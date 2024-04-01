@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Model for the Products table
+model Product {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  description       String?
+  price             Float
+  quantity          Int
+  // Relation product - category
+  category          Category            @relation(fields: [categoryId], references: [id])
+  categoryId        Int
+  // Relation product - supplier
+  supplier          Supplier            @relation(fields: [supplierId], references: [id])
+  supplierId        Int
+  supplierProducts  SupplierProduct[]
+  orderDetails      OrderDetail[]
+  InventoryMovement InventoryMovement[]
+  InternalInventory InternalInventory[]
+  SupplyInventory   SupplyInventory[]
+}
+
+// Model for the Categories table
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+// Model for the Customers table
+model Customer {
+  id      Int     @id @default(autoincrement())
+  name    String
+  address String
+  phone   String
+  orders  Order[]
+}
+
+// Model for the Suppliers table
+model Supplier {
+  id       Int               @id @default(autoincrement())
+  name     String
+  address  String
+  phone    String
+  products SupplierProduct[]
+  Product  Product[]
+}
+
+// Model for the Orders table
+model Order {
+  id           Int           @id @default(autoincrement())
+  date         DateTime      @default(now())
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  customerId   Int
+  orderDetails OrderDetail[]
+}
+
+// Model for the OrderDetails table
+model OrderDetail {
+  id        Int     @id @default(autoincrement())
+  quantity  Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+// Model for the InventoryMovements table
+model InventoryMovement {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  type      String
+  quantity  Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+// Model for the SupplierProducts table
+model SupplierProduct {
+  id         Int      @id @default(autoincrement())
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  supplierId Int
+}
+
+// Model for the InternalInventory table
+model InternalInventory {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+}
+
+// Model for the SupplyInventory table
+model SupplyInventory {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+}
